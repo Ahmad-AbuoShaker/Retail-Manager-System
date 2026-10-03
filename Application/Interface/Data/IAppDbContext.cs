@@ -1,9 +1,9 @@
 ﻿using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace Application.Common.Interface
+namespace Application.Interface.Data
 {
-    public interface IAppDbContex
+    public interface IAppDbContext
     {
         public DbSet<User> Users { get; }
         public DbSet<Sale> Sales { get; }
