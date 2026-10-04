@@ -19,12 +19,14 @@ namespace WebApi
 
             #region Database
 
+             string? ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+            
 
             builder.Services.AddDbContext<IAppDbContext, AppDbContext>(options =>
             {
-                options.UseSqlServer(
-                    builder.Configuration.GetConnectionString("DefaultConnection"))
-                .LogTo(Console.WriteLine, new[] { DbLoggerCategory.Database.Command.Name }, LogLevel.Information);
+                options.UseSqlServer(ConnectionString).LogTo(Console.WriteLine,
+                                      new[] { DbLoggerCategory.Database.Command.Name }, LogLevel.Information);
                 
                 if (builder.Environment.IsDevelopment())
                     options.EnableSensitiveDataLogging();
@@ -114,16 +116,16 @@ namespace WebApi
             #endregion
           
             
-            builder.Services.AddRateLimiter(options =>
-            {
-                options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-                options.AddFixedWindowLimiter("auth", o =>
-                {
-                    o.PermitLimit = 5;
-                    o.Window = TimeSpan.FromMinutes(1);
-                    o.QueueLimit = 0;
-                });
-            });
+            //builder.Services.AddRateLimiter(options =>
+            //{
+            //    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+            //    options.AddFixedWindowLimiter("auth", o =>
+            //    {
+            //        o.PermitLimit = 5;
+            //        o.Window = TimeSpan.FromMinutes(1);
+            //        o.QueueLimit = 0;
+            //    });
+            //});
 
             var app = builder.Build();
 
@@ -140,7 +142,7 @@ namespace WebApi
           
 
             app.UseCors("UniAPICORSPolicy");
-            app.UseRateLimiter();
+            //app.UseRateLimiter();
             app.UseAuthentication();
             app.UseAuthorization();
 

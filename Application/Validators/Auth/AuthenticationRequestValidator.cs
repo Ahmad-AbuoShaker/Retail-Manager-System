@@ -1,7 +1,7 @@
 using Application.DTOs.Auth;
 using FluentValidation;
 
-namespace Application.Validators;
+namespace Application.Validators.Auth;
 
 public class AuthenticationRequestValidator : AbstractValidator<AuthenticationRequest>
 {
