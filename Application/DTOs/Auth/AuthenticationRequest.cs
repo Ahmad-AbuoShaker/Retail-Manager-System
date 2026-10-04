@@ -1,6 +1,6 @@
 ﻿
 
-namespace Application.DTOs.Auht
+namespace Application.DTOs.Auth
 {
     public class AuthenticationRequest
     {

@@ -1,9 +1,12 @@
-
-using Application.Interface;
+using Application.Interface.Data;
+using FluentValidation;
 using Infrastructure.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
-
+using System.Text;
+using FluentValidation;
 
 namespace WebApi
 {
@@ -21,8 +24,7 @@ namespace WebApi
                 options.UseSqlServer(
                     builder.Configuration.GetConnectionString("DefaultConnection"))
                 .LogTo(Console.WriteLine, new[] { DbLoggerCategory.Database.Command.Name }, LogLevel.Information);
-               
-
+                
                 if (builder.Environment.IsDevelopment())
                     options.EnableSensitiveDataLogging();
 
@@ -46,7 +48,35 @@ namespace WebApi
                             .AsMatchingInterface()
                             .WithScopedLifetime()
                             );
+
+            builder.Services.AddValidatorsFromAssemblyContaining<Application.IAssemblyMaker>();
             #endregion
+
+            var jwtKey = builder.Configuration["Jwt:Key"];
+            if (string.IsNullOrWhiteSpace(jwtKey))
+            {
+                throw new InvalidOperationException("JWT Key is missing. Set 'Jwt:Key' in user-secrets or configuration.");
+            }
+
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                        ValidAudience = builder.Configuration["Jwt:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+                    };
+                });
+            
+
+        
+
+            builder.Services.AddAuthorization();
 
             builder.Services.AddControllers();
 

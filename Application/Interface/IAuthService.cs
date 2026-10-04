@@ -1,5 +1,5 @@
 ﻿using Application.DTOs;
-using Application.DTOs.Auht;
+using Application.DTOs.Auth;
 using Domain.Entities;
 using System;
 using System.Collections.Generic;

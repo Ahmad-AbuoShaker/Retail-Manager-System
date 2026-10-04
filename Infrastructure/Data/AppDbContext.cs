@@ -1,35 +1,34 @@
-﻿using Application.Common.Interface;
+﻿using Application.Interface.Data;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using Application.Common.Interface;
-using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace Infrastructure.Data
+namespace Infrastructure.Data;
+
+public class AppDbContext : DbContext, IAppDbContext
 {
-    public class AppDbContext : DbContext, IAppDbContext
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-        {
+    }
 
-        }
-        public DbSet<User> Users { get; set; }
-        public DbSet<Sale> Sales { get; set; }
-        public DbSet<SaleDetail> SaleDetails { get; set; }
-        public DbSet<Product> Products { get; set; }
-        public DbSet<Inventory> Inventorys { get; set; }
+    public DbSet<User> Users => Set<User>();
+    public DbSet<Sale> Sales => Set<Sale>();
+    public DbSet<SaleDetail> SaleDetails => Set<SaleDetail>();
+    public DbSet<Product> Products => Set<Product>();
+    public DbSet<Inventory> Inventories => Set<Inventory>();
 
-        
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+    }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder.Properties<decimal>().HavePrecision(18, 2);
+    }
 
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(IAssemblyMaker).Assembly);
-        }
-
-        public async Task<int> SaveChangeAsync(CancellationToken cancellationToken)
-        {
-            return await base.SaveChangesAsync(cancellationToken);
-        }
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        return await base.SaveChangesAsync(cancellationToken);
     }
 }

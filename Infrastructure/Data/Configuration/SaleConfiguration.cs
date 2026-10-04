@@ -2,16 +2,23 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Infrastructure.Data.Configuration
+namespace Infrastructure.Data.Configuration;
+
+public class SaleConfiguration : IEntityTypeConfiguration<Sale>
 {
-    public class SaleConfiguration : IEntityTypeConfiguration<Product>
+    public void Configure(EntityTypeBuilder<Sale> builder)
     {
-        public void Configure(EntityTypeBuilder<Product> builder)
-        {
+        builder.HasKey(s => s.Id);
+        builder.Property(s => s.SaleDate).IsRequired();
+        builder.Property(s => s.SubTotal).IsRequired();
+        builder.Property(s => s.Tax).IsRequired();
+        builder.Property(s => s.Total).IsRequired();
 
-        }
+        builder.HasOne(s => s.User)
+            .WithMany(u => u.Sales)
+            .HasForeignKey(s => s.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
-
 }
 
 

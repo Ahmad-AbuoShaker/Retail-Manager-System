@@ -2,7 +2,7 @@
 
 using System.ComponentModel.DataAnnotations;
 
-namespace Application.DTOs.Auht
+namespace Application.DTOs.Auth
 {
     public class RegisterRequest
     {
