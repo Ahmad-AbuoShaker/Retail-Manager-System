@@ -31,15 +31,15 @@ namespace Infrastructure.Identity.Security
 
             var claims = new List<Claim>{
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email)
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.Role)
                             };
 
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
 
-            var credentials = new SigningCredentials(
-                key,
-                SecurityAlgorithms.HmacSha256);
+            var credentials = new SigningCredentials(key,
+                                        SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
