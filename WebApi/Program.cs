@@ -2,11 +2,12 @@ using Application.Interface.Data;
 using FluentValidation;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
-using FluentValidation;
+using System.Threading.RateLimiting;
 
 namespace WebApi
 {
@@ -111,7 +112,18 @@ namespace WebApi
             });
 
             #endregion
-
+          
+            
+            builder.Services.AddRateLimiter(options =>
+            {
+                options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+                options.AddFixedWindowLimiter("auth", o =>
+                {
+                    o.PermitLimit = 5;
+                    o.Window = TimeSpan.FromMinutes(1);
+                    o.QueueLimit = 0;
+                });
+            });
 
             var app = builder.Build();
 
@@ -123,6 +135,9 @@ namespace WebApi
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+           
+          
 
             app.UseCors("UniAPICORSPolicy");
             app.UseRateLimiter();

@@ -14,4 +14,9 @@ public class PasswordService : IPasswordService
     {
         return BCrypt.Net.BCrypt.Verify(password, hashedPassword);
     }
+
+    public bool VerifyPassword(string password, object passwordHash)
+    {
+        return VerifyPassword(password, passwordHash?.ToString() ?? string.Empty);
+    }
 }

@@ -19,6 +19,13 @@ namespace Application.DTOs.Auth
         [Compare(nameof(Password))]
         public string ConfirmPassword { get; set; } = string.Empty;
 
+        [Required]
+        [MaxLength(50)]
+        public string FirstName { get; set; } = string.Empty;
+
+        [Required]
+        [MaxLength(50)]
+        public string LastName { get; set; } = string.Empty;
     }
 
 }

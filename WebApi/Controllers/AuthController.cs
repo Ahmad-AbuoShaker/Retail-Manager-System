@@ -2,11 +2,13 @@ using Application.DTOs;
 using Application.DTOs.Auth;
 using Application.Interface;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace WebApi.Controllers;
 
 [ApiController]
 [Route("api/auth")]
+[EnableRateLimiting("auth")]
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
@@ -17,9 +19,9 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+    public async Task<IActionResult> Register([FromBody] RegisterRequest request,CancellationToken ct)
     {
-        var response = await _authService.RegisterAsync(request);
+        var response = await _authService.RegisterAsync(request, ct);
         
         if (!response.Succeeded)
         {
@@ -34,9 +36,9 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] AuthenticationRequest request)
+    public async Task<IActionResult> Login([FromBody] AuthenticationRequest request,CancellationToken ct)
     {
-        var response = await _authService.LoginAsync(request);
+        var response = await _authService.LoginAsync(request,ct);
         
         if (!response.Succeeded)
         {

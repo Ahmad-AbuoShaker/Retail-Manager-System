@@ -19,5 +19,15 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
         RuleFor(x => x.ConfirmPassword)
             .NotEmpty().WithMessage("Confirm password is required.")
             .Equal(x => x.Password).WithMessage("Passwords do not match.");
+
+        RuleFor(x => x.FirstName)
+            .NotEmpty().WithMessage("First name is required.")
+            .MaximumLength(50).WithMessage("First name must not exceed 50 characters.")
+            .Must(x => x == x.Trim()).WithMessage("First name cannot have leading or trailing spaces.");
+
+        RuleFor(x => x.LastName)
+            .NotEmpty().WithMessage("Last name is required.")
+            .MaximumLength(50).WithMessage("Last name must not exceed 50 characters.")
+            .Must(x => x == x.Trim()).WithMessage("Last name cannot have leading or trailing spaces.");
     }
 }

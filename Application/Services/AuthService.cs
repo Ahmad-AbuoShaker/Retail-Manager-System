@@ -5,6 +5,7 @@ using Application.Interface.Data;
 using Application.Interface.Security;
 using FluentValidation;
 using Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services;
 
@@ -30,30 +31,22 @@ public class AuthService : IAuthService
         _loginValidator = loginValidator;
     }
 
-    public async Task<BaseResponse<AuthenticationResponse>> RegisterAsync(RegisterRequest request)
+    public async Task<BaseResponse<AuthenticationResponse>> RegisterAsync(RegisterRequest request, CancellationToken ct = default)
     {
-        var validationResult = await _registerValidator.ValidateAsync(request);
+        var validationResult = await _registerValidator.ValidateAsync(request, ct);
         if (!validationResult.IsValid)
         {
-            return new BaseResponse<AuthenticationResponse>
-            {
-                Succeeded = false,
-                Message = "Validation failed",
-                Errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList()
-            };
+            return Failed(validationResult.Errors.Select(e => e.ErrorMessage).ToList(), "Validation failed");
         }
 
         var normalizedEmail = request.Email.Trim().ToLowerInvariant();
+        var firstName = request.FirstName.Trim();
+        var lastName = request.LastName.Trim();
 
-        var existingUser = _appDbContext.Users.FirstOrDefault(u => u.Email == normalizedEmail);
-        if (existingUser != null)
+        var emailExists = await _appDbContext.Users.AnyAsync(u => u.Email == normalizedEmail, ct);
+        if (emailExists)
         {
-            return new BaseResponse<AuthenticationResponse>
-            {
-                Succeeded = false,
-                Message = "Email already registered",
-                Errors = new List<string> { "Email already registered" }
-            };
+            return Failed("Email already registered");
         }
 
         var passwordHash = _passwordService.HashPassword(request.Password);
@@ -63,12 +56,21 @@ public class AuthService : IAuthService
             Id = Guid.NewGuid(),
             Email = normalizedEmail,
             PasswordHash = passwordHash,
-            Role = "Customer",
+            Role = "Cashier",
+            FirstName = firstName,
+            LastName = lastName,
             CreatedDate = DateTime.UtcNow
         };
 
-        _appDbContext.Users.Add(user);
-        await _appDbContext.SaveChangesAsync();
+        try
+        {
+            _appDbContext.Users.Add(user);
+            await _appDbContext.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException)
+        {
+            return Failed("Email already registered");
+        }
 
         var accessToken = _tokenService.GenerateAccessToken(user);
 
@@ -80,30 +82,21 @@ public class AuthService : IAuthService
         };
     }
 
-    public async Task<BaseResponse<AuthenticationResponse>> LoginAsync(AuthenticationRequest request)
+    public async Task<BaseResponse<AuthenticationResponse>> LoginAsync(AuthenticationRequest request, CancellationToken ct)
     {
-        var validationResult = await _loginValidator.ValidateAsync(request);
+        var validationResult = await _loginValidator.ValidateAsync(request, ct);
         if (!validationResult.IsValid)
         {
-            return new BaseResponse<AuthenticationResponse>
-            {
-                Succeeded = false,
-                Message = "Validation failed",
-                Errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList()
-            };
+            return Failed(validationResult.Errors.Select(e => e.ErrorMessage).ToList(), "Validation failed");
         }
 
         var normalizedEmail = request.Email.Trim().ToLowerInvariant();
 
-        var user = _appDbContext.Users.FirstOrDefault(u => u.Email == normalizedEmail);
+        var user = await _appDbContext.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail, ct);
+
         if (user == null || !_passwordService.VerifyPassword(request.Password, user.PasswordHash))
         {
-            return new BaseResponse<AuthenticationResponse>
-            {
-                Succeeded = false,
-                Message = "Invalid credentials",
-                Errors = new List<string> { "Invalid credentials" }
-            };
+            return Failed("Invalid credentials");
         }
 
         var accessToken = _tokenService.GenerateAccessToken(user);
@@ -115,4 +108,25 @@ public class AuthService : IAuthService
             Data = new AuthenticationResponse { AccessToken = accessToken }
         };
     }
+
+    private static BaseResponse<AuthenticationResponse> Failed(List<string> errors, string message)
+    {
+        return new BaseResponse<AuthenticationResponse>
+        {
+            Succeeded = false,
+            Message = message,
+            Errors = errors
+        };
+    }
+
+    private static BaseResponse<AuthenticationResponse> Failed(string message)
+    {
+        return new BaseResponse<AuthenticationResponse>
+        {
+            Succeeded = false,
+            Message = message,
+            Errors = new List<string> { message }
+        };
+    }
+
 }
