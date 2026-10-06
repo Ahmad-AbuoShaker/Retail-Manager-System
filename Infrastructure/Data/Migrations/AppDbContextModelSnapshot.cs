@@ -87,7 +87,7 @@ namespace Infrastructure.Data.Migrations
                     b.Property<int>("QuantityInStock")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .HasDefaultValue(1);
+                        .HasDefaultValue(0);
 
                     b.Property<decimal>("RetailPrice")
                         .HasPrecision(18, 2)
@@ -95,7 +95,10 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", t =>
+                        {
+                            t.HasCheckConstraint("CK_Products_QuantityInStock_NonNegative", "[QuantityInStock] >= 0");
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.Sale", b =>

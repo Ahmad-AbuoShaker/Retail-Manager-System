@@ -1,9 +1,11 @@
+using Application;
 using Application.Interface.Data;
 using FluentValidation;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
@@ -60,6 +62,17 @@ namespace WebApi
             {
                 throw new InvalidOperationException("JWT Key is missing. Set 'Jwt:Key' in user-secrets or configuration.");
             }
+
+            var taxSection = builder.Configuration.GetSection(TaxSettings.SectionName);
+            if (!taxSection.Exists())
+            {
+                throw new InvalidOperationException("Tax configuration section is missing.");
+            }
+
+            builder.Services.AddOptions<TaxSettings>()
+                .Bind(taxSection)
+                .Validate(s => s.Rate >= 0 && s.Rate <= 1, "Tax rate must be between 0 and 1.")
+                .ValidateOnStart();
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>

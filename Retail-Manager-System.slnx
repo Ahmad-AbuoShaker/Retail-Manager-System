@@ -2,5 +2,6 @@
   <Project Path="Application/Application.csproj" Id="eac3fe03-a178-4fbb-be93-21d0de7c79e4" />
   <Project Path="Domain/Domain.csproj" Id="5fc6cfd9-8a9c-403e-b24d-cfd539ca25ad" />
   <Project Path="Infrastructure/Infrastructure.csproj" Id="9451901a-8522-4b54-abed-5ef5e713a93a" />
+  <Project Path="Tests/Domain.Tests/Tests.csproj" />
   <Project Path="WebApi/WebApi.csproj" Id="60f1252c-bde8-4a0c-8496-cb421cb4bf00" />
 </Solution>
