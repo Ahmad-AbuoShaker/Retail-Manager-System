@@ -1,4 +1,5 @@
 using Application;
+using Application.Interfaces;
 using Application.Interface.Data;
 using FluentValidation;
 using Infrastructure.Data;
@@ -10,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
 using System.Threading.RateLimiting;
+using WebApi.Services;
 
 namespace WebApi
 {
@@ -41,6 +43,9 @@ namespace WebApi
             #endregion
 
             #region DI
+
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
             builder.Services.Scan(scan => scan.FromAssemblyOf<Application.IAssemblyMaker>()
                             .AddClasses(classes => classes.Where(t => t.Name.EndsWith("Service")))
