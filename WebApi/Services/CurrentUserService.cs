@@ -4,6 +4,7 @@ using System.Security.Claims;
 
 namespace WebApi.Services;
 
+// Reads the user ID from the JWT NameIdentifier claim.
 public class CurrentUserService : ICurrentUserService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;

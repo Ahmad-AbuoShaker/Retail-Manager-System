@@ -14,7 +14,7 @@ public class SaleService : ISaleService
     private readonly ICurrentUserService _currentUser;
     private readonly IOptions<TaxSettings> _taxSettings;
 
-    public SaleService(IAppDbContext context, ICurrentUserService currentUser,IOptions<TaxSettings> taxSettings)
+    public SaleService(IAppDbContext context, ICurrentUserService currentUser, IOptions<TaxSettings> taxSettings)
     {
         _context = context;
         _currentUser = currentUser;
@@ -23,8 +23,10 @@ public class SaleService : ISaleService
 
     public async Task<CreateSaleResponse> CreateAsync(CreateSaleRequest request, CancellationToken ct = default)
     {
+        // Get cashier ID from JWT claims
         var cashierId = _currentUser.UserId;
 
+        // Merge duplicate product IDs in request (sum quantities)
         var itemGroups = request.Items
             .GroupBy(i => i.ProductId)
             .Select(g => new { ProductId = g.Key, Quantity = g.Sum(i => i.Quantity) })
@@ -32,11 +34,13 @@ public class SaleService : ISaleService
 
         var productIds = itemGroups.Select(g => g.ProductId).ToList();
 
+        // Load all products in one query
         var products = await _context.Products
             .Where(p => productIds.Contains(p.Id))
             .Select(p => new { p.Id, p.RetailPrice, p.IsTaxable, p.QuantityInStock })
             .ToDictionaryAsync(p => p.Id, ct);
 
+        // Validate all products exist and have sufficient stock
         foreach (var group in itemGroups)
         {
             if (!products.TryGetValue(group.ProductId, out var product))
@@ -55,6 +59,7 @@ public class SaleService : ISaleService
         decimal subtotal = 0m;
         decimal taxTotal = 0m;
 
+        // Calculate line totals and tax
         foreach (var group in itemGroups)
         {
             var product = products[group.ProductId];
@@ -88,11 +93,13 @@ public class SaleService : ISaleService
             SaleDetails = details
         };
 
+        // Atomic transaction: stock deduction + sale insert
         using var transaction = await _context.Database.BeginTransactionAsync(ct);
         try
         {
             foreach (var item in itemGroups)
             {
+                // Decrement stock only if still sufficient (prevents race conditions)
                 var rows = await _context.Products
                     .Where(p => p.Id == item.ProductId && p.QuantityInStock >= item.Quantity)
                     .ExecuteUpdateAsync(s => s.SetProperty(p => p.QuantityInStock, p => p.QuantityInStock - item.Quantity), ct);
