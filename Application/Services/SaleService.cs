@@ -76,7 +76,7 @@ public class SaleService : ISaleService
             {
                 ProductId = group.ProductId,
                 Quantity = group.Quantity,
-                PurchasePrice = unitPrice,
+                UnitPrice = unitPrice,
                 Tax = lineTax
             });
         }

@@ -18,6 +18,13 @@ public class SaleConfiguration : IEntityTypeConfiguration<Sale>
             .WithMany(u => u.Sales)
             .HasForeignKey(s => s.UserId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.ToTable(t =>
+        {
+            t.HasCheckConstraint("CK_Sales_SubTotal_NonNegative", "[SubTotal] >= 0");
+            t.HasCheckConstraint("CK_Sales_Tax_NonNegative", "[Tax] >= 0");
+            t.HasCheckConstraint("CK_Sales_Total_NonNegative", "[Total] >= 0");
+        });
     }
 }
 

@@ -19,13 +19,16 @@ namespace Infrastructure.Data.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ProductName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    QuantityInStock = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
                     RetailPrice = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    IsTaxable = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     LastModified = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Products", x => x.Id);
+                    table.CheckConstraint("CK_Products_QuantityInStock_NonNegative", "[QuantityInStock] >= 0");
                 });
 
             migrationBuilder.CreateTable(
@@ -33,12 +36,12 @@ namespace Infrastructure.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FirstName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    LastName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Role = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
                 },
                 constraints: table =>
                 {
@@ -59,6 +62,8 @@ namespace Infrastructure.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Inventories", x => x.Id);
+                    table.CheckConstraint("CK_Inventories_PurchasePrice_NonNegative", "[PurchasePrice] >= 0");
+                    table.CheckConstraint("CK_Inventories_Quantity_NonNegative", "[Quantity] >= 0");
                     table.ForeignKey(
                         name: "FK_Inventories_Products_ProductId",
                         column: x => x.ProductId,
@@ -82,6 +87,9 @@ namespace Infrastructure.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Sales", x => x.Id);
+                    table.CheckConstraint("CK_Sales_SubTotal_NonNegative", "[SubTotal] >= 0");
+                    table.CheckConstraint("CK_Sales_Tax_NonNegative", "[Tax] >= 0");
+                    table.CheckConstraint("CK_Sales_Total_NonNegative", "[Total] >= 0");
                     table.ForeignKey(
                         name: "FK_Sales_Users_UserId",
                         column: x => x.UserId,
@@ -99,12 +107,15 @@ namespace Infrastructure.Data.Migrations
                     SaleId = table.Column<int>(type: "int", nullable: false),
                     ProductId = table.Column<int>(type: "int", nullable: false),
                     Quantity = table.Column<int>(type: "int", nullable: false, defaultValue: 1),
-                    PurchasePrice = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    UnitPrice = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     Tax = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false, defaultValue: 0m)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SaleDetails", x => x.Id);
+                    table.CheckConstraint("CK_SaleDetails_Quantity_NonNegative", "[Quantity] >= 0");
+                    table.CheckConstraint("CK_SaleDetails_Tax_NonNegative", "[Tax] >= 0");
+                    table.CheckConstraint("CK_SaleDetails_UnitPrice_NonNegative", "[UnitPrice] >= 0");
                     table.ForeignKey(
                         name: "FK_SaleDetails_Products_ProductId",
                         column: x => x.ProductId,

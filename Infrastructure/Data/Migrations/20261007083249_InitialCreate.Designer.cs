@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261006141307_FixQuantityInStockDefaultAndCheck")]
-    partial class FixQuantityInStockDefaultAndCheck
+    [Migration("20261007083249_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -52,7 +52,12 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("Inventories");
+                    b.ToTable("Inventories", t =>
+                        {
+                            t.HasCheckConstraint("CK_Inventories_PurchasePrice_NonNegative", "[PurchasePrice] >= 0");
+
+                            t.HasCheckConstraint("CK_Inventories_Quantity_NonNegative", "[Quantity] >= 0");
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.Product", b =>
@@ -134,7 +139,14 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Sales");
+                    b.ToTable("Sales", t =>
+                        {
+                            t.HasCheckConstraint("CK_Sales_SubTotal_NonNegative", "[SubTotal] >= 0");
+
+                            t.HasCheckConstraint("CK_Sales_Tax_NonNegative", "[Tax] >= 0");
+
+                            t.HasCheckConstraint("CK_Sales_Total_NonNegative", "[Total] >= 0");
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.SaleDetail", b =>
@@ -147,10 +159,6 @@ namespace Infrastructure.Data.Migrations
 
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
-
-                    b.Property<decimal>("PurchasePrice")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Quantity")
                         .ValueGeneratedOnAdd()
@@ -166,13 +174,24 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("decimal(18,2)")
                         .HasDefaultValue(0m);
 
+                    b.Property<decimal>("UnitPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ProductId");
 
                     b.HasIndex("SaleId");
 
-                    b.ToTable("SaleDetails");
+                    b.ToTable("SaleDetails", t =>
+                        {
+                            t.HasCheckConstraint("CK_SaleDetails_Quantity_NonNegative", "[Quantity] >= 0");
+
+                            t.HasCheckConstraint("CK_SaleDetails_Tax_NonNegative", "[Tax] >= 0");
+
+                            t.HasCheckConstraint("CK_SaleDetails_UnitPrice_NonNegative", "[UnitPrice] >= 0");
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>

@@ -18,5 +18,11 @@ public class InventoryConfiguration : IEntityTypeConfiguration<Inventory>
             .WithMany(p => p.Inventories)
             .HasForeignKey(i => i.ProductId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.ToTable(t =>
+        {
+            t.HasCheckConstraint("CK_Inventories_Quantity_NonNegative", "[Quantity] >= 0");
+            t.HasCheckConstraint("CK_Inventories_PurchasePrice_NonNegative", "[PurchasePrice] >= 0");
+        });
     }
 }
