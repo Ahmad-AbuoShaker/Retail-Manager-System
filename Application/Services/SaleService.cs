@@ -5,6 +5,7 @@ using Application.Interfaces;
 using Application.Interface.Data;
 using Domain.Entities;
 using Domain.Services;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -15,18 +16,31 @@ public class SaleService : ISaleService
     private readonly IAppDbContext _context;
     private readonly ICurrentUserService _currentUser;
     private readonly IOptions<TaxSettings> _taxSettings;
+    private readonly IValidator<CreateSaleRequest> _validator;
 
-    public SaleService(IAppDbContext context, ICurrentUserService currentUser, IOptions<TaxSettings> taxSettings)
+    public SaleService(IAppDbContext context, ICurrentUserService currentUser, IOptions<TaxSettings> taxSettings, IValidator<CreateSaleRequest> validator)
     {
         _context = context;
         _currentUser = currentUser;
         _taxSettings = taxSettings;
+        _validator = validator;
     }
 
     public async Task<BaseResponse<CreateSaleResponse>> CreateAsync(CreateSaleRequest request, CancellationToken ct = default)
     {
         try
         {
+            var validationResult = await _validator.ValidateAsync(request, ct);
+            if (!validationResult.IsValid)
+            {
+                return new BaseResponse<CreateSaleResponse>
+                {
+                    Succeeded = false,
+                    Message = "Validation failed",
+                    Errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList()
+                };
+            }
+
             var cashierId = _currentUser.UserId;
 
             var itemGroups = request.Items

@@ -30,6 +30,7 @@ public class SalesController : ControllerBase
             {
                 SaleErrorCode.ProductNotFound => NotFound(response),
                 SaleErrorCode.InsufficientStock => Conflict(response),
+                SaleErrorCode.UnexpectedError => StatusCode(StatusCodes.Status500InternalServerError, response),
                 _ => BadRequest(response)
             };
         }

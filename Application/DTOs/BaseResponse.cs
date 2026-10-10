@@ -17,7 +17,7 @@
             Message = message;
             Errors = new List<string>();
         }
-        public bool Succeeded;
+        public bool Succeeded { get; set; }
         public string Message { get; set; }
         public List<string> Errors { get; set; }
         public T Data { get; set; }
