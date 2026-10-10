@@ -1,24 +1,26 @@
-﻿
-
-namespace Application.DTOs
+﻿namespace Application.DTOs
 {
     public class BaseResponse<T>
     {
         public BaseResponse()
         {
+            Errors = new List<string>();
         }
         public BaseResponse(T data, string message = null)
         {
             Message = message;
             Data = data;
+            Errors = new List<string>();
         }
         public BaseResponse(string message)
         {
             Message = message;
+            Errors = new List<string>();
         }
         public bool Succeeded;
         public string Message { get; set; }
-        public List<string> Errors;
+        public List<string> Errors { get; set; }
         public T Data { get; set; }
+        public Application.Enums.SaleErrorCode? ErrorCode { get; set; }
     }
 }
