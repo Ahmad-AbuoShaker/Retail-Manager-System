@@ -2,7 +2,7 @@ using Application.DTOs;
 using Application.DTOs.Sales;
 using Application.Enums;
 using Application.Interfaces;
-using Application.Interface.Data;
+using Application.Interfaces.Data;
 using Domain.Entities;
 using Domain.Services;
 using FluentValidation;

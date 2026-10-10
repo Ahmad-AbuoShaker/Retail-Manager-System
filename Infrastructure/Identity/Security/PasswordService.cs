@@ -1,4 +1,4 @@
-using Application.Interface.Security;
+using Application.Interfaces.Security;
 using BCrypt.Net;
 
 namespace Infrastructure.Identity.Security;

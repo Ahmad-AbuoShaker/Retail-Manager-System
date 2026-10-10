@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 
-namespace Application.Interface.Data;
+namespace Application.Interfaces.Data;
 
 public interface IAppDbContext
 {

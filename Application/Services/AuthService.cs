@@ -1,8 +1,8 @@
 ﻿using Application.DTOs;
 using Application.DTOs.Auth;
-using Application.Interface;
-using Application.Interface.Data;
-using Application.Interface.Security;
+using Application.Interfaces;
+using Application.Interfaces.Data;
+using Application.Interfaces.Security;
 using FluentValidation;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;

@@ -1,7 +1,7 @@
 ﻿using Application.DTOs;
 using Application.DTOs.User;
-using Application.Interface;
-using Application.Interface.Data;
+using Application.Interfaces;
+using Application.Interfaces.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

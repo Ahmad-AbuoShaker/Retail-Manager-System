@@ -1,6 +1,6 @@
 using Application.DTOs;
 using Application.DTOs.Auth;
-using Application.Interface;
+using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 

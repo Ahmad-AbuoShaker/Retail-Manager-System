@@ -1,6 +1,6 @@
 ﻿using Application.DTOs;
 using Application.DTOs.User;
-using Application.Interface;
+using Application.Interfaces;
 using Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

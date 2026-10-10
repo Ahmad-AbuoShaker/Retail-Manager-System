@@ -1,6 +1,6 @@
 using Application;
 using Application.Interfaces;
-using Application.Interface.Data;
+using Application.Interfaces.Data;
 using FluentValidation;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
