@@ -2,7 +2,7 @@
 
 ## Structure (Retail-Manager-System.slnx)
 - Domain/ — Entities (User, Product, Inventory, Sale, SaleDetail) + Services/TaxCalculator.cs (pure static function)
-- Application/ — Services (AuthService, ProductService, SaleService, UserService), DTOs/ (Auth, Product, Sales, User), Validators/ (Auth, Sales), Enums/SaleErrorCode.cs
+- Application/ — Services (AuthService, ProductService, SaleService, UserService), DTOs/ (Auth, Product, Sales, User), Validators/ (Auth, Sales), Enums/ErrorCode.cs
   - Interfaces/ — all interfaces live here (unified 2026-10-10): IAuthService, IProductService, IUserService, ICurrentUserService, ISaleService, Data/IAppDbContext, Security/IJwtTokenService, IPasswordService
 - Infrastructure/ — Data/ (AppDbContext, Configuration/*, Migrations/), Identity/Security/ (JwtTokenService, PasswordService)
 - WebApi/ — Controllers/ (Auth, Product, Sales, User), Services/CurrentUserService.cs, Program.cs
@@ -25,7 +25,7 @@
 - Validation (FluentValidation) is invoked manually inside each service via IValidator<T>.ValidateAsync (same pattern as AuthService and SaleService) — no auto-validation, no filters
 - The server computes all prices and totals; the client only sends ProductId and Quantity
 - Sales endpoints require [Authorize(Roles = "Cashier")]
-- Service errors are returned via BaseResponse<T> with an enum ErrorCode (e.g. SaleErrorCode); never leak a raw exception message to the client
+- Service errors are returned via BaseResponse<T> with an enum ErrorCode; never leak a raw exception message to the client
 - Login: generic "Invalid credentials" message, and a dummy BCrypt hash check when the user doesn't exist, to prevent timing leaks
 
 ## Database rules
@@ -44,6 +44,7 @@
 - Never trust a summary of your own work — always show raw output (full git diff, full dotnet build, actual SQL query results)
 - Never change real code just to make a test pass; if they conflict, report it instead of changing the design
 - Never touch an already-applied migration; never delete/modify migration files without explicit permission
+- Never modify AGENTS.md unless explicitly asked; if it needs an update, say what to change and wait
 - Never use `git add .` or `git add -A` — stage explicit paths only
 - Show `git diff --cached` before every commit, and wait for an explicit "approved" before committing
 - Code and comments in English only: short, clear, direct
