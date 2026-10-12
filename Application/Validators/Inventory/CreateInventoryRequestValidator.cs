@@ -17,7 +17,8 @@ public class CreateInventoryRequestValidator : AbstractValidator<CreateInventory
             .GreaterThanOrEqualTo(0).WithMessage("PurchasePrice must be greater than or equal to 0.");
 
         RuleFor(x => x.PurchaseDate)
-            .LessThanOrEqualTo(DateTime.UtcNow).When(x => x.PurchaseDate.HasValue)
+            .Must(d => d!.Value.ToUniversalTime() <= DateTime.UtcNow)
+            .When(x => x.PurchaseDate.HasValue)
             .WithMessage("PurchaseDate cannot be in the future.");
     }
 }

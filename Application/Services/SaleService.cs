@@ -166,4 +166,47 @@ public class SaleService : ISaleService
             };
         }
     }
+
+    public async Task<BaseResponse<IEnumerable<SalesReportDto>>> GetSalesReportAsync(CancellationToken ct = default)
+    {
+        try
+        {
+            var report = await _context.Sales
+                .AsNoTracking()
+                .Join(_context.Users.AsNoTracking(),
+                    s => s.UserId,
+                    u => u.Id,
+                    (s, u) => new SalesReportDto
+                    {
+                        SaleDate = s.SaleDate,
+                        SubTotal = s.SubTotal,
+                        Tax = s.Tax,
+                        Total = s.Total,
+                        CashierFirstName = u.FirstName,
+                        CashierLastName = u.LastName,
+                        CashierEmail = u.Email
+                    })
+                .OrderByDescending(r => r.SaleDate)
+                .ToListAsync(ct);
+
+            return new BaseResponse<IEnumerable<SalesReportDto>>
+            {
+                Succeeded = true,
+                Message = "Sales report retrieved successfully",
+                Data = report
+            };
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex);
+            return new BaseResponse<IEnumerable<SalesReportDto>>
+            {
+                Succeeded = false,
+                ErrorCode = ErrorCode.Unexpected,
+                Message = "An error occurred while retrieving sales report.",
+                Errors = new List<string>(),
+                Data = []
+            };
+        }
+    }
 }
