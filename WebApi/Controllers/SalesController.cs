@@ -28,9 +28,9 @@ public class SalesController : ControllerBase
         {
             return response.ErrorCode switch
             {
-                SaleErrorCode.ProductNotFound => NotFound(response),
-                SaleErrorCode.InsufficientStock => Conflict(response),
-                SaleErrorCode.UnexpectedError => StatusCode(StatusCodes.Status500InternalServerError, response),
+                ErrorCode.NotFound => NotFound(response),
+                ErrorCode.Conflict => Conflict(response),
+                ErrorCode.Unexpected => StatusCode(StatusCodes.Status500InternalServerError, response),
                 _ => BadRequest(response)
             };
         }

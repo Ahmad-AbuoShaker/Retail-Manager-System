@@ -62,7 +62,7 @@ public class SaleService : ISaleService
                     return new BaseResponse<CreateSaleResponse>
                     {
                         Succeeded = false,
-                        ErrorCode = SaleErrorCode.ProductNotFound,
+                        ErrorCode = ErrorCode.NotFound,
                         Message = $"Product {group.ProductId} not found.",
                         Errors = new List<string> { $"Product {group.ProductId} not found." }
                     };
@@ -122,7 +122,7 @@ public class SaleService : ISaleService
                         return new BaseResponse<CreateSaleResponse>
                         {
                             Succeeded = false,
-                            ErrorCode = SaleErrorCode.InsufficientStock,
+                            ErrorCode = ErrorCode.Conflict,
                             Message = $"Insufficient stock for product {item.ProductId}.",
                             Errors = new List<string> { $"Insufficient stock for product {item.ProductId}." }
                         };
@@ -160,7 +160,7 @@ public class SaleService : ISaleService
             return new BaseResponse<CreateSaleResponse>
             {
                 Succeeded = false,
-                ErrorCode = SaleErrorCode.UnexpectedError,
+                ErrorCode = ErrorCode.Unexpected,
                 Message = "An error occurred while creating the sale.",
                 Errors = new List<string>()
             };
