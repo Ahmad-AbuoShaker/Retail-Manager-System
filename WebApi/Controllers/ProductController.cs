@@ -1,13 +1,12 @@
 ﻿using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers
 {
     [Route("api/product")]
     [ApiController]
-    [Authorize]
+    [Authorize(Roles = "Cashier,Admin")]
     public class ProductController : ControllerBase
     {
         private readonly IProductService _productService;

@@ -1,4 +1,4 @@
-﻿
+﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Application.DTOs.Auth
@@ -9,5 +9,7 @@ namespace Application.DTOs.Auth
         
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? RefreshToken { get; set; }
+        
+        public List<string> Roles { get; set; } = new();
     }
 }

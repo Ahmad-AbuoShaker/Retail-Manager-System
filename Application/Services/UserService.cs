@@ -3,9 +3,7 @@ using Application.DTOs.User;
 using Application.Interfaces;
 using Application.Interfaces.Data;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Application.Services
@@ -19,25 +17,32 @@ namespace Application.Services
             _appDbContext = appDbContext;
         }
 
-            
         public async Task<BaseResponse<UserDto>> GetByIdAsync(Guid id, CancellationToken ct)
         {
-            var user = await _appDbContext.Users.Select(u =>
-                new UserDto {
-                    Id = u.Id,
-                    Email = u.Email,
-                    FirstName = u.FirstName,
-                    LastName = u.LastName,
-                    CreatedDate = u.CreatedDate,
-                    Role = u.Role
-                }).AsNoTracking().FirstOrDefaultAsync(u => u.Id == id,ct);
+            var user = await _appDbContext.Users
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Id == id, ct);
 
             if (user == null)
             {
                 return Failed("User not found");
             }
 
-            return new BaseResponse<UserDto> { Data = user, Succeeded = true };
+            var roles = user.UserRoles.Select(ur => ur.Role.Name).ToList();
+
+            var userDto = new UserDto
+            {
+                Id = user.Id,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                CreatedDate = user.CreatedDate,
+                Roles = roles
+            };
+
+            return new BaseResponse<UserDto> { Data = userDto, Succeeded = true };
         }
 
         private static BaseResponse<UserDto> Failed(string message)

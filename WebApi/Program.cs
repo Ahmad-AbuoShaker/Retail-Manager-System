@@ -1,6 +1,8 @@
 using Application;
 using Application.Interfaces;
 using Application.Interfaces.Data;
+using Application.Interfaces.Security;
+using Domain.Entities;
 using FluentValidation;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -13,12 +15,13 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using WebApi.Services;
+using WebApi.Seed;
 
 namespace WebApi
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -169,8 +172,12 @@ namespace WebApi
 
             #endregion
 
+            if (app.Environment.IsDevelopment())
+            {
+                await DevAdminSeeder.SeedAsync(app.Services, app.Configuration);
+            }
 
-            app.Run();
+            await app.RunAsync();
         }
     }
 }

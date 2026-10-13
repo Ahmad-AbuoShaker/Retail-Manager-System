@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers;
 
-[Authorize]
 [Route("api/inventory")]
 [ApiController]
 public class InventoryController : ControllerBase
@@ -19,7 +18,7 @@ public class InventoryController : ControllerBase
         _inventoryService = inventoryService;
     }
 
-    // TODO: restrict to admin role
+    [Authorize(Roles = "Manager,Admin")]
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken ct = default)
     {
@@ -39,7 +38,7 @@ public class InventoryController : ControllerBase
         return Ok(response);
     }
 
-    // TODO: restrict to admin role
+    [Authorize(Roles = "WarehouseWorker,Admin")]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateInventoryRequest request, CancellationToken ct = default)
     {

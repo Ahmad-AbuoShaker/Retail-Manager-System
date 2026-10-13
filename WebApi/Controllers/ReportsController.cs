@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers;
 
-[Authorize]
+[Authorize(Roles = "Admin,Manager")]
 [Route("api/reports")]
 [ApiController]
 public class ReportsController : ControllerBase
@@ -19,7 +19,6 @@ public class ReportsController : ControllerBase
         _saleService = saleService;
     }
 
-    // TODO: restrict to admin role
     [HttpGet("sales")]
     public async Task<IActionResult> GetSalesReport(CancellationToken ct = default)
     {

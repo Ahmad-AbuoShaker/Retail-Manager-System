@@ -3,8 +3,8 @@ using Application.DTOs.Auth;
 using Application.Interfaces;
 using Application.Interfaces.Data;
 using Application.Interfaces.Security;
-using FluentValidation;
 using Domain.Entities;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services;
@@ -56,7 +56,6 @@ public class AuthService : IAuthService
             Id = Guid.NewGuid(),
             Email = normalizedEmail,
             PasswordHash = passwordHash,
-            Role = "Cashier",
             FirstName = firstName,
             LastName = lastName,
             CreatedDate = DateTime.UtcNow
@@ -66,19 +65,27 @@ public class AuthService : IAuthService
         {
             _appDbContext.Users.Add(user);
             await _appDbContext.SaveChangesAsync(ct);
+
+            var cashierRole = await _appDbContext.Roles.FirstOrDefaultAsync(r => r.Name == "Cashier", ct);
+            if (cashierRole != null)
+            {
+                _appDbContext.UserRoles.Add(new UserRole { UserId = user.Id, RoleId = cashierRole.Id });
+                await _appDbContext.SaveChangesAsync(ct);
+            }
         }
         catch (DbUpdateException)
         {
             return Failed("Email already registered");
         }
 
-        var accessToken = _tokenService.GenerateAccessToken(user);
+        var roles = new List<string> { "Cashier" };
+        var accessToken = _tokenService.GenerateAccessToken(user, roles);
 
         return new BaseResponse<AuthenticationResponse>
         {
             Succeeded = true,
             Message = "Registration successful",
-            Data = new AuthenticationResponse { AccessToken = accessToken }
+            Data = new AuthenticationResponse { AccessToken = accessToken, Roles = roles }
         };
     }
 
@@ -92,20 +99,24 @@ public class AuthService : IAuthService
 
         var normalizedEmail = request.Email.Trim().ToLowerInvariant();
 
-        var user = await _appDbContext.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail, ct);
+        var user = await _appDbContext.Users
+            .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+            .FirstOrDefaultAsync(u => u.Email == normalizedEmail, ct);
 
         if (user == null || !_passwordService.VerifyPassword(request.Password, user.PasswordHash))
         {
             return Failed("Invalid credentials");
         }
 
-        var accessToken = _tokenService.GenerateAccessToken(user);
+        var roles = user.UserRoles.Select(ur => ur.Role.Name).ToList();
+        var accessToken = _tokenService.GenerateAccessToken(user, roles);
 
         return new BaseResponse<AuthenticationResponse>
         {
             Succeeded = true,
             Message = "Login successful",
-            Data = new AuthenticationResponse { AccessToken = accessToken }
+            Data = new AuthenticationResponse { AccessToken = accessToken, Roles = roles }
         };
     }
 
@@ -128,5 +139,4 @@ public class AuthService : IAuthService
             Errors = new List<string> { message }
         };
     }
-
 }

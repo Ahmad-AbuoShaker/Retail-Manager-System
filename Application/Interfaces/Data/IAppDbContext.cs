@@ -12,6 +12,8 @@ public interface IAppDbContext
     DbSet<SaleDetail> SaleDetails { get; }
     DbSet<Product> Products { get; }
     DbSet<Inventory> Inventories { get; }
+    DbSet<Role> Roles { get; }
+    DbSet<UserRole> UserRoles { get; }
 
     DatabaseFacade Database { get; }
 

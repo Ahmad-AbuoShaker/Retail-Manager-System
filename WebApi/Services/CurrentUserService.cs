@@ -1,10 +1,11 @@
 using Application.Interfaces;
 using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 
 namespace WebApi.Services;
 
-// Reads the user ID from the JWT NameIdentifier claim.
 public class CurrentUserService : ICurrentUserService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
@@ -30,6 +31,17 @@ public class CurrentUserService : ICurrentUserService
             }
 
             return userId;
+        }
+    }
+
+    public IReadOnlyList<string> Roles
+    {
+        get
+        {
+            var roles = _httpContextAccessor.HttpContext?.User?.FindAll(ClaimTypes.Role)
+                ?.Select(c => c.Value)
+                .ToList() ?? new List<string>();
+            return roles;
         }
     }
 }
