@@ -1,8 +1,8 @@
 # Retail Manager (ASP.NET Core 10, Clean Architecture)
 
 ## Structure (Retail-Manager-System.slnx)
-- Domain/ — Entities (User, Product, Inventory, Sale, SaleDetail) + Services/TaxCalculator.cs (pure static function)
-- Application/ — Services (AuthService, ProductService, SaleService, UserService), DTOs/ (Auth, Product, Sales, User), Validators/ (Auth, Sales), Enums/ErrorCode.cs
+- Domain/ — Entities (User, Product, Inventory, Sale, SaleDetail, Role, UserRole) + Services/TaxCalculator.cs (pure static function)
+- Application/ — Services (AuthService, ProductService, SaleService, UserService, InventoryService), DTOs/ (Auth, Product, Sales, User), Validators/ (Auth, Sales, Inventory), Enums/ErrorCode.cs
   - Interfaces/ — all interfaces live here (unified 2026-10-10): IAuthService, IProductService, IUserService, ICurrentUserService, ISaleService, Data/IAppDbContext, Security/IJwtTokenService, IPasswordService
 - Infrastructure/ — Data/ (AppDbContext, Configuration/*, Migrations/), Identity/Security/ (JwtTokenService, PasswordService)
 - WebApi/ — Controllers/ (Auth, Product, Sales, User), Services/CurrentUserService.cs, Program.cs
@@ -26,10 +26,10 @@
 - The server computes all prices and totals; the client only sends ProductId and Quantity
 - Sales endpoints require [Authorize(Roles = "Cashier")]
 - Service errors are returned via BaseResponse<T> with an enum ErrorCode; never leak a raw exception message to the client
-- Login: generic "Invalid credentials" message, and a dummy BCrypt hash check when the user doesn't exist, to prevent timing leaks
+- Login: generic "Invalid credentials" message for timing-attack protection (prevents user enumeration)
 
 ## Database rules
-- Keys: int for regular tables, Guid for User only
+- Keys: int for most tables, Guid for User and Role
 - datetime2 always UTC
 - No stored computed values (SaleDetail stores UnitPrice and line-level tax, not a stored total)
 - Sale stores UserId (not CashierId)
@@ -50,6 +50,7 @@
 - Code and comments in English only: short, clear, direct
 - No secrets in code; use appsettings.Development.json or user-secrets
 - Always write descriptive commit messages
+- Always add English comments, short and simple.
 
 ## Known issues (do not fix unless explicitly asked)
 - 9-11 nullable reference warnings (CS8618/CS8625) in Domain and Application DTOs
@@ -57,7 +58,7 @@
 - No rate limiter enabled, no seed data
 - UseCors without a fully registered AddCors — verify before relying on it
 - No GET /api/sales/{id}, so POST /api/sales returns 200, not 201
-- Role "Cashier"/"Customer" hardcoded as plain strings in multiple places (AuthService, [Authorize] attribute, entity default) — not a current priority; may move to a DB-backed roles table later
+- Role "Cashier/Admin/WarehouseWorker/Manager" hardcoded as plain strings in multiple places (AuthService, [Authorize] attribute, entity default) — not a current priority; may move to a DB-backed roles table later
 
 ## Marker files (created intentionally, leave as-is)
 - Application/InterfaceMark.cs
