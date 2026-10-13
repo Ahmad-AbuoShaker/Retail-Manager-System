@@ -115,7 +115,7 @@ namespace WebApi
             {
                 options.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Title = "Training Center System API",
+                    Title = "Retail Manager System API",
                     Version = "v1"
                 });
 
