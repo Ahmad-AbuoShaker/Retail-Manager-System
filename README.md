@@ -147,13 +147,3 @@ Required configuration (via user-secrets or `appsettings.Development.json`):
 
 > **Note**: Roles are hardcoded as plain strings; not DB-backed at this time.
 
-## Known Issues / Limitations
-
-- 9 nullable reference warnings (CS8618/CS8625) in Domain and Application DTOs
-- Test folder named "Domin" instead of "Domain" (known typo)
-- No rate limiter enabled (code commented out in Program.cs)
-- CORS policy `UniAPICORSPolicy` registered but verify full `AddCors` registration
-- Role "Cashier/Admin/WarehouseWorker/Manager" hardcoded as plain strings in multiple places
-- No seed data applied by default (admin seed only when `Seed:AdminEmail`/`Seed:AdminPassword` are set in development)
-- No GET `/api/sales/{id}` endpoint — `POST /api/sales` returns 200, not 201
-- Entity Framework Core 'net10.0' framework version (verify compatibility with your setup)
